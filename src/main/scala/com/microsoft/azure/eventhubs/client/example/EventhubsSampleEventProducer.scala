@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.microsoft.eventhubs.client.example
+package com.microsoft.azure.eventhubs.client.example
 
 import java.util.Calendar
 
@@ -77,13 +77,8 @@ class EventhubsSampleEventProducer(
 
         currentEventCount += 1
 
-        if (eventCount > 0) {
+        if (eventCount > 0 && currentEventCount >= eventCount) currentEventCount
 
-          if (currentEventCount >= eventCount) {
-
-            return currentEventCount
-          }
-        }
       }
       catch {
 

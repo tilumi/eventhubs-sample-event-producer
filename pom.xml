@@ -2,8 +2,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.microsoft.eventhubs.client.example</groupId>
-  <artifactId>com-microsoft-eventhubs-client-example</artifactId>
+  <groupId>com.microsoft.azure.eventhubs.client.example</groupId>
+  <artifactId>com-microsoft-azure-eventhubs-client-example</artifactId>
   <version>0.2.0</version>
   <name>${project.artifactId}</name>
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.microsoft.eventhubs.client.example
+package com.microsoft.azure.eventhubs.client.example
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -35,29 +35,20 @@ object EventhubsClientDriver {
     var threadCount: Int = 1
     var messageCount: Long = -1
 
-    if(inputOptions.contains(Symbol(ClientArgumentKeys.PartitionID))) {
-
+    if(inputOptions.contains(Symbol(ClientArgumentKeys.PartitionID)))
       partitionId = inputOptions(Symbol(ClientArgumentKeys.PartitionID)).asInstanceOf[String]
-    }
 
-    if(inputOptions.contains(Symbol(ClientArgumentKeys.MessageCount))) {
-
+    if(inputOptions.contains(Symbol(ClientArgumentKeys.MessageCount)))
       messageCount = inputOptions(Symbol(ClientArgumentKeys.MessageCount)).asInstanceOf[Long]
-    }
 
-    if(inputOptions.contains(Symbol(ClientArgumentKeys.ThreadCount))) {
-
+    if(inputOptions.contains(Symbol(ClientArgumentKeys.ThreadCount)))
       threadCount = inputOptions(Symbol(ClientArgumentKeys.ThreadCount)).asInstanceOf[Int]
-    }
 
     var messageCountPerThread: Long = 0
 
-    if (messageCount > 0) {
+    if (messageCount > 0) messageCountPerThread = Math.ceil(messageCount/threadCount).toLong
 
-      messageCountPerThread = Math.ceil(messageCount/threadCount).toLong
-    }
-
-    val producerTasks = for (i <- 0 to threadCount - 1) yield Future {
+    val producerTasks = for (i <- 0 until threadCount) yield Future {
 
       val eventProducer: EventhubsSampleEventProducer = new EventhubsSampleEventProducer(
         inputOptions(Symbol(ClientArgumentKeys.PolicyName)).asInstanceOf[String],

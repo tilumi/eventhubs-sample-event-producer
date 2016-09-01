@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.microsoft.eventhubs.client.example
+package com.microsoft.azure.eventhubs.client.example
 
 object ClientArgumentKeys extends Enumeration {
   val EventhubsNamespace: String = "eventhubsNamespace"
