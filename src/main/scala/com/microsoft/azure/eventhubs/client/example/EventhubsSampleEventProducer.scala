@@ -48,7 +48,9 @@ class EventhubsSampleEventProducer(
     val randomGenerator: Random = new Random()
 
     var currentEventCount: Long = 0
-    var eventIndex: Long = eventStartIndex
+    var currentEventIndex: Long = eventStartIndex
+
+    val threadId = Thread.currentThread().getId
 
     while(true) {
 
@@ -64,25 +66,22 @@ class EventhubsSampleEventProducer(
 
         val eventData: EventData = new EventData(eventPayload.getBytes())
 
-        eventHubsClient.send(eventData)
-
-        if(currentEventCount % 1024 == 0) {
-
-          eventIndex = currentEventCount + eventStartIndex
-
-          val threadId = Thread.currentThread().getId
-
-          println(s"$threadId > $eventIndex > $currentTime > Sending event: $eventPayload")
-        }
+        eventHubsClient.sendSync(eventData)
 
         currentEventCount += 1
 
-        if (eventCount > 0 && currentEventCount >= eventCount) currentEventCount
+        if(currentEventCount % 1024 == 0) {
 
+          currentEventIndex = currentEventCount + eventStartIndex
+
+          println(s"$threadId > $currentTime > $currentEventCount > $currentEventIndex > Sending event: $eventPayload")
+        }
+
+        if (eventCount > 0 && currentEventCount >= eventCount) return currentEventCount
       }
       catch {
 
-        case e: Exception => s"$eventIndex > $currentTime > Exception: $e"
+        case e: Exception => println(s"$currentEventIndex > $currentTime > Exception: $e")
       }
     }
 

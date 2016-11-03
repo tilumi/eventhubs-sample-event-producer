@@ -17,9 +17,10 @@
 
 package com.microsoft.azure.eventhubs.client.example
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+import java.util.concurrent.Executors
+
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object EventhubsClientDriver {
 
@@ -44,9 +45,13 @@ object EventhubsClientDriver {
     if(inputOptions.contains(Symbol(ClientArgumentKeys.ThreadCount)))
       threadCount = inputOptions(Symbol(ClientArgumentKeys.ThreadCount)).asInstanceOf[Int]
 
-    var messageCountPerThread: Long = 0
+    var messageCountPerThread: Long = -1
 
     if (messageCount > 0) messageCountPerThread = Math.ceil(messageCount/threadCount).toLong
+
+    println(s"Events per thread: $messageCountPerThread (-1 for unlimited)")
+
+    implicit val executionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(threadCount))
 
     val producerTasks = for (i <- 0 until threadCount) yield Future {
 
@@ -63,10 +68,16 @@ object EventhubsClientDriver {
       eventProducer.GenerateEvents()
     }
 
-    val eventFutures: Future[Long] = Future.reduce(producerTasks)((x, y) => x + y)
+    val aggregatedFutures = Future.sequence(producerTasks)
 
-    val totalEvents = Await.result(eventFutures, Duration.Inf)
+    aggregatedFutures.onComplete {
+      case Success(x) =>
+        println(s"Total events sent: ${x.sum}")
+        sys.exit()
 
-    println(s"Total Events Sent: $totalEvents")
+      case Failure(e) =>
+        println(e)
+        sys.exit()
+    }
   }
 }
