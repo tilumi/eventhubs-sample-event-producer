@@ -17,12 +17,14 @@
 
 package com.microsoft.azure.eventhubs.client.example
 
+import java.text.SimpleDateFormat
 import java.util.Calendar
 
 import com.microsoft.azure.eventhubs.{EventData, EventHubClient}
 import com.microsoft.azure.servicebus.ConnectionStringBuilder
-//import org.json4s._
-//import org.json4s.jackson.Serialization._
+import org.json4s._
+import org.json4s.JsonDSL._
+import org.json4s.jackson.JsonMethods._
 
 import scala.util.Random
 
@@ -51,6 +53,7 @@ class EventhubsSampleEventProducer(
     var currentEventIndex: Long = eventStartIndex
 
     val threadId = Thread.currentThread().getId
+    val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
 
     while(true) {
 
@@ -58,11 +61,7 @@ class EventhubsSampleEventProducer(
 
       try {
 
-        //val eventPayload: EventPayload = EventPayload(randomGenerator.alphanumeric.take(eventLength).mkString)
-
-        //implicit val formats = DefaultFormats
-
-        val eventPayload: String = randomGenerator.alphanumeric.take(eventLength).mkString
+        val eventPayload: String = (1 to eventLength).map((_) => compact(render(getEventJson(df, randomGenerator)))).mkString("")
 
         val eventData: EventData = new EventData(eventPayload.getBytes())
 
@@ -86,5 +85,21 @@ class EventhubsSampleEventProducer(
     }
 
     currentEventCount
+  }
+
+  private def getEventJson(df: SimpleDateFormat, randomGenerator: Random) = {
+    ("Time" -> df.format(Calendar.getInstance().getTime)) ~
+      ("Server" -> randomGenerator.alphanumeric.take(12).toString()) ~
+      ("Region" -> "NAM") ~
+      ("SpamEngineRolloutStage" -> (500 + randomGenerator.nextInt(150)).toString) ~
+      ("Forest" -> s"namprd${randomGenerator.nextInt(10)}.prod.outlook.com") ~
+      ("Dag" -> s"nampr${randomGenerator.nextInt(10)}dg${randomGenerator.nextInt(1000)}") ~
+      ("Datacenter" -> s"DM${randomGenerator.nextInt(10)}") ~
+      ("ExchangeVersion" ->  s"15.20.0178.${randomGenerator.nextInt(100)}") ~
+      ("KeySource" -> s"SpamFilter${randomGenerator.nextInt(20)}") ~
+      ("KeyEntity" -> s"PartitionId${randomGenerator.nextInt(50)}") ~
+      ("KeyEvent" -> s"IPSpam${randomGenerator.nextInt(50)}") ~
+      ("Value" -> s"${randomGenerator.nextInt()}") ~
+      ("Type" -> "OpticsLogSinkCount")
   }
 }
